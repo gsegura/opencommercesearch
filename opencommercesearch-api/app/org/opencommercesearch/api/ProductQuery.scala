@@ -308,6 +308,27 @@ class ProductSearchQuery(q: String, site: String)(implicit context: Context, req
 }
 
 /**
+ * A more like this query
+ *
+ * @param pid the product we are using to find other similar products
+ * @param site is the site to search in
+ * @param context is the search context
+ * @param request is the HTTP request
+ *
+ */
+class ProductMoreLikeThisQuery(pid: String, site: String)(implicit context: Context, request: Request[AnyContent]) extends ProductQuery("productId:"+pid, site) {
+  protected override def init() : Unit = {
+    super.init()
+    setRequestHandler("/mlt")
+    setFields("id","productId")
+    addFilterQuery("isToos:false")
+    addFilterQuery(s"category:0.${site}")
+    //TODO gsegura: figure out how to do this better cause if I don't add the fq again or we get the id & productId with the same value 
+    addFilterQuery(s"{!collapse field=productId}country:${context.lang.country} AND category:0.${site}")
+  }
+}
+
+/**
  * A browse query
  *
  * @param site is the site to search in

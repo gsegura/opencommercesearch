@@ -687,6 +687,7 @@ object ProductController extends BaseController {
     withErrorHandling(doBrowse(version, categoryId, site, null, outlet), s"Cannot browse category [$categoryId]")
   }
 
+  
   private def doBrowse(version: Int, categoryId: String, site: String, brandId: String, isOutlet: Boolean)(implicit context: Context, request: Request[AnyContent]) = {
     val startTime = System.currentTimeMillis()
     val query = new ProductBrowseQuery(site)
@@ -1024,4 +1025,57 @@ object ProductController extends BaseController {
     withErrorHandling(future, s"Cannot find products for [$id]")
   }
 
+  
+  @ApiOperation(value = "Find similar products", notes = "Returns similar products for a given product", response = classOf[Product], httpMethod = "GET")
+  @ApiImplicitParams(value = Array(
+    new ApiImplicitParam(name = "offset", value = "Offset in the complete product result list", defaultValue = "0", required = false, dataType = "int", paramType = "query"),
+    new ApiImplicitParam(name = "limit", value = "Maximum number of products", defaultValue = "10", required = false, dataType = "int", paramType = "query"),
+    new ApiImplicitParam(name = "fields", value = "Comma delimited field list", required = false, dataType = "string", paramType = "query"),
+    new ApiImplicitParam(name = "filterQueries", value = "Filter queries from a facet filter", required = false, dataType = "string", paramType = "query"),
+    new ApiImplicitParam(name = "preview", value = "Display preview results", defaultValue = "false", required = false, dataType = "boolean", paramType = "query")
+  ))
+  def findSimilarProducts(
+      version: Int,
+      @ApiParam(value = "Find products similar to this one", required = true)
+      @PathParam("id")
+      id: String
+      @ApiParam(value = "Site to browse", required = true),
+      @QueryParam("site")
+      site: String) = ContextAction.async { implicit context => implicit request =>
+    Logger.debug(s"Find similar products $id")
+    withErrorHandling(findMoreLikeThis(version, id, site), s"Cannot find similar products for [$id]")
+  }
+  
+  private def findMoreLikeThis(version: Int, productId: String, site: String)(implicit context: Context, request: Request[AnyContent]) = {
+    val startTime = System.currentTimeMillis()
+    val query = new ProductMoreLikeThisQuery(productId, site)
+      .withPagination()
+      .withFilterQueries()
+
+    solrServer.query(query).flatMap { response =>
+      if (query.getRows > 0) {
+        val docResponse = response.getResults()
+        val groupSummary = response.getResponse.get("groups_summary").asInstanceOf[NamedList[Object]]
+        
+        val productIds = new util.ArrayList[(String, String)]
+        docResponse.foreach(product => { 
+          productIds.add((product.getFieldValue("productId").asInstanceOf[String], product.getFieldValue("id").asInstanceOf[String]))
+        })
+        val storage = withNamespace(storageFactory)
+        storage.findProducts(productIds, context.lang.country, fieldList(allowStar = true), minimumFields = true).map(products => {
+
+          withCacheHeaders(buildSearchResponse(
+            query = query,
+            found = Some(docResponse.getNumFound()),
+            productSummary = processGroupSummary(groupSummary),
+            startTime = Some(startTime),
+            products = Some(products map (Json.toJson(_)))), products map (_.getId))
+
+        })
+      } else {
+        Future.successful(buildSearchResponse(query = query, found = Some(0), startTime = Some(startTime),
+          message = Some("No products found")))
+      }
+    }
+  }
 }
