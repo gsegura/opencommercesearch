@@ -4,7 +4,10 @@
       <str name="mlt.mintf">1</str>  
       <str name="mlt.match.include">false</str> 
     </lst> 
+  <!--
     <arr name="last-components">
+      <str>expandall</str>
       <str>groupCollapse</str>
     </arr>
+  -->
   </requestHandler>
