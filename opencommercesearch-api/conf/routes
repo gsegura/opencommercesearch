@@ -61,6 +61,8 @@ POST          /v1/facets/commit                                          org.ope
 POST          /v1/facets/rollback                                        org.opencommercesearch.api.controllers.FacetController.commitOrRollback(preview: Boolean ?= false, commit: Boolean = false, rollback: Boolean = true)
 DELETE        /v1/facets                                                 org.opencommercesearch.api.controllers.FacetController.deleteByQuery(preview: Boolean ?= false, query: String ?= "*:*")
 
+#sentiment routes
+GET           /v1/sentiment/:id                                         org.opencommercesearch.api.controllers.SentimentController.findById(version: Int = 1, id: String, preview: Boolean ?= false)
 # docs
 GET           /api-docs                                                  org.opencommercesearch.api.controllers.ApiDocController.index
 GET           /api-docs/                                                 controllers.ApiHelpController.getResources
@@ -70,6 +72,7 @@ GET           /api-docs/products                                         control
 GET           /api-docs/queries                                          controllers.ApiHelpController.getResource(path = "queries")
 GET           /api-docs/facets                                           controllers.ApiHelpController.getResource(path = "facets")
 GET           /api-docs/rules                                            controllers.ApiHelpController.getResource(path = "rules")
+GET           /api-docs/sentiment                                            controllers.ApiHelpController.getResource(path = "sentiment")
 
 GET           /images/*file                                              controllers.Assets.at(path="/public/images", file)
 GET           /assets/*file                                              controllers.Assets.at(path="/public", file)

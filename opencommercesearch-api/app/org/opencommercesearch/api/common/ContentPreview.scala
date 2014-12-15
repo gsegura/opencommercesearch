@@ -118,6 +118,15 @@ trait ContentPreview {
     collection
   }
 
+  def withSentimentCollection(query: SolrQuery, preview: Boolean, acceptLanguages:Seq[Lang]) : SolrQuery = {
+    query.setParam("collection", SentimentCollection)
+  }
+
+  def withSentimentCollection[T <: AbstractUpdateRequest](request: T, preview: Boolean, acceptLanguages:Seq[Lang]) : T = {
+    request.setParam("collection", SentimentCollection)
+    request
+  }
+
   private def country(acceptLanguages:Seq[Lang]) : String = {
     preferred(acceptLanguages).country
   }
