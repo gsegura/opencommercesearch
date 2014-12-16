@@ -62,6 +62,7 @@ POST          /v1/facets/rollback                                        org.ope
 DELETE        /v1/facets                                                 org.opencommercesearch.api.controllers.FacetController.deleteByQuery(preview: Boolean ?= false, query: String ?= "*:*")
 
 #sentiment routes
+GET           /v1/sentiment/tendencies                                   org.opencommercesearch.api.controllers.SentimentController.getTendencies(version: Int = 1)
 GET           /v1/sentiment/aggregate                                    org.opencommercesearch.api.controllers.SentimentController.getAggregatedSentiment(version: Int = 1)
 GET           /v1/sentiment/:productIds                                  org.opencommercesearch.api.controllers.SentimentController.getByProductList(version: Int = 1, productIds: String)
 
