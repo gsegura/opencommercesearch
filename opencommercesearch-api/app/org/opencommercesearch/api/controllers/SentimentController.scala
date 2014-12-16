@@ -92,12 +92,12 @@ object SentimentController extends BaseController {
       val stats = response.getFieldStatsInfo
       if (stats != null && stats.size() > 0) {
         val statsEntry = stats.get("sentiment_d")
-        Ok(Json.obj("sentiment" -> statsEntry.getMean.toString))
+        withCorsHeaders(Ok(Json.obj("sentiment" -> statsEntry.getMean.toString)))
       } else {
         Logger.debug(s"Sentiment for categoryId [$categoryId] and brandId [$brandId] not found")
-        NotFound(Json.obj(
+        withCorsHeaders(NotFound(Json.obj(
           "message" -> s"Cannot find sentiment for categoryId [$categoryId] brandId [$brandId]"
-        ))
+        )))
       }
     })
 
