@@ -147,11 +147,11 @@ object SentimentController extends BaseController {
               }
             }
           }
-          Ok(Json.obj("results" -> Json.toJson(aggregates.toMap)))
+          withCorsHeaders(Ok(Json.obj("results" -> Json.toJson(aggregates.toMap))))
         }
       } else {
         Logger.debug(s"Tendencies for brands not found")
-        Future.successful(NotFound(Json.obj("message" -> s"Cannot find tendencies for brands")))
+        Future.successful(withCorsHeaders(NotFound(Json.obj("message" -> s"Cannot find tendencies for brands"))))
       }
     })
 
