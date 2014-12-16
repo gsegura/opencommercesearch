@@ -26,6 +26,7 @@ object ApplicationBuild extends Build {
     "com.fasterxml.jackson.core" % "jackson-core" % "2.2.3" force(),
     "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.2.3",
     "org.mongodb" % "mongo-java-driver" % "2.11.3",
+    "org.apache.commons" % "commons-lang3" % "3.3.2",
     "org.jongo" % "jongo" % "1.0",
     "org.apache.solr" % "solr-core" % "4.8.1" excludeAll(
       ExclusionRule(organization = "log4j"),

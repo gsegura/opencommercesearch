@@ -19,17 +19,15 @@ package org.opencommercesearch.api.common
 * under the License.
 */
 
-import play.api.mvc.{AnyContent, Request}
-import play.api.i18n.Lang
-import play.api.i18n.Lang.preferred
-import play.api.Play.current
-
 import org.apache.solr.client.solrj.SolrQuery
 import org.apache.solr.client.solrj.request.AbstractUpdateRequest
-
 import org.opencommercesearch.api.Global._
-import org.opencommercesearch.api.service.{StorageFactory, Storage}
+import org.opencommercesearch.api.service.{Storage, StorageFactory}
 import org.opencommercesearch.common.Context
+import play.api.Play.current
+import play.api.i18n.Lang
+import play.api.i18n.Lang.preferred
+import play.api.mvc.Request
 
 trait ContentPreview {
 
@@ -118,11 +116,11 @@ trait ContentPreview {
     collection
   }
 
-  def withSentimentCollection(query: SolrQuery, preview: Boolean, acceptLanguages:Seq[Lang]) : SolrQuery = {
+  def withSentimentCollection(query: SolrQuery, acceptLanguages:Seq[Lang]) : SolrQuery = {
     query.setParam("collection", SentimentCollection)
   }
 
-  def withSentimentCollection[T <: AbstractUpdateRequest](request: T, preview: Boolean, acceptLanguages:Seq[Lang]) : T = {
+  def withSentimentCollection[T <: AbstractUpdateRequest](request: T, acceptLanguages:Seq[Lang]) : T = {
     request.setParam("collection", SentimentCollection)
     request
   }
