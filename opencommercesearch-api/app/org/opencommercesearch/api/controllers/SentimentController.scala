@@ -173,7 +173,8 @@ object SentimentController extends BaseController {
       val stats = response.getFieldStatsInfo
       if (stats != null && stats.size() > 0) {
         val statsEntry = stats.get("sentiment_d")
-        Option(new Tuple2(brandId, statsEntry.getMean.asInstanceOf[Double]))
+        //TODO gsegura: add a parameter to choose if we return the stddev or the mean
+        Option(new Tuple2(brandId, statsEntry.getStddev.asInstanceOf[Double]))
       } else {
         Logger.warn("No sentiments found for BrandId: [$brandId]")
         None
