@@ -66,7 +66,7 @@ GET           /v1/sentiment/aggregate                                    org.ope
 GET           /v1/sentiment/:productIds                                  org.opencommercesearch.api.controllers.SentimentController.getByProductList(version: Int = 1, productIds: String)
 
 #reports routes
-GET           /v1/reports/plprevenue/:days                                org.opencommercesearch.api.controllers.ReportsController.getPlpPageRevenue(version: Int = 1, days: Int)
+GET           /v1/reports/pagerevenue/:days                                org.opencommercesearch.api.controllers.ReportsController.getPageRevenue(version: Int = 1, days: Int)
 
 # docs
 GET           /api-docs                                                  org.opencommercesearch.api.controllers.ApiDocController.index
