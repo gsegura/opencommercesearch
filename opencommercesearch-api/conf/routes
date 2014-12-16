@@ -65,6 +65,9 @@ DELETE        /v1/facets                                                 org.ope
 GET           /v1/sentiment/aggregate                                    org.opencommercesearch.api.controllers.SentimentController.getAggregatedSentiment(version: Int = 1)
 GET           /v1/sentiment/:productIds                                  org.opencommercesearch.api.controllers.SentimentController.getByProductList(version: Int = 1, productIds: String)
 
+#reports routes
+GET           /v1/reports/plprevenue/:days                                org.opencommercesearch.api.controllers.ReportsController.getPlpPageRevenue(version: Int = 1, days: Int)
+
 # docs
 GET           /api-docs                                                  org.opencommercesearch.api.controllers.ApiDocController.index
 GET           /api-docs/                                                 controllers.ApiHelpController.getResources
@@ -75,6 +78,8 @@ GET           /api-docs/queries                                          control
 GET           /api-docs/facets                                           controllers.ApiHelpController.getResource(path = "facets")
 GET           /api-docs/rules                                            controllers.ApiHelpController.getResource(path = "rules")
 GET           /api-docs/sentiment                                        controllers.ApiHelpController.getResource(path = "sentiment")
+GET           /api-docs/reports                                          controllers.ApiHelpController.getResource(path = "reports")
+
 
 GET           /images/*file                                              controllers.Assets.at(path="/public/images", file)
 GET           /assets/*file                                              controllers.Assets.at(path="/public", file)

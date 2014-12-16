@@ -6,7 +6,7 @@ import com.wordnik.swagger.annotations._
 import org.apache.commons.lang.StringUtils
 import org.apache.solr.client.solrj.SolrQuery
 import org.opencommercesearch.api.Global._
-import org.opencommercesearch.api.models.{SentimentList}
+import org.opencommercesearch.api.models.SentimentList
 import play.api.Logger
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.json.Json
