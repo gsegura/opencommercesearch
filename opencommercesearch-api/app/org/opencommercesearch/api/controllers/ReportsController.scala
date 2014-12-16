@@ -41,7 +41,7 @@ object ReportsController extends  BaseController {
       val data = Json.parse(jsonTemplate)
 
       OmnitureClient.callOmniture(data, reportMethod).map { response =>
-        Ok(response.json)
+        withCorsHeaders(Ok(response.json))
       }
     }
   }
