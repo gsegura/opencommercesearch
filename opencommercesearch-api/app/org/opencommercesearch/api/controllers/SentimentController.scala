@@ -49,13 +49,13 @@ object SentimentController extends BaseController {
       val results = response.getResults
       Logger.debug("Num found " + results.getNumFound)
       if (results.getNumFound > 0 && results.get(0) != null) {
-        Ok(Json.obj("results" -> SentimentList.fromDefinition(results)))
+        withCorsHeaders(Ok(Json.obj("results" -> SentimentList.fromDefinition(results))))
       }
       else {
         Logger.debug("Sentiment for productIds: " + productIds + " not found")
-        NotFound(Json.obj(
+        withCorsHeaders(NotFound(Json.obj(
           "message" -> s"Cannot find sentiment for productIds [$productIds]"
-        ))
+        )))
       }
     })
 
