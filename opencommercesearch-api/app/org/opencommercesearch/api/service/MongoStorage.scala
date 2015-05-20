@@ -44,6 +44,7 @@ class MongoStorage(database: DefaultDB) extends Storage[LastError] {
   val categoryCollection = database[BSONCollection]("categories")
   val facetCollection = database[BSONCollection]("facets")
   val ruleCollection = database[BSONCollection]("rules")
+  val contentCollection = database[BSONCollection]("content")
 
   /**
    * Keep Mongo indexes to the minimum, specially if it saves a roundtrip to Solr for simple things
@@ -103,11 +104,19 @@ class MongoStorage(database: DefaultDB) extends Storage[LastError] {
         .cursor[Product]
         .collect[Seq]()
 
+      val contentFuture: Future[Iterable[ProductContent]] = if (site != NoSite) {
+        findContent(ids, site)
+      } else {
+        Future.successful(Seq.empty[ProductContent])
+      }
+
       productFuture map { products =>
         val productSort = Map(ids.map { case (productId, _) => productId } zip (1 to ids.size): _*)
 
-          products.map { p => filterSearchProduct(site, country, p, minimumFields, fields) } sortWith { case (p1, p2) =>
-          (p1.id, p2.id) match {
+        products.map { p =>
+          updateProductContent(contentFuture, filterSearchProduct(site, country, p, minimumFields, fields))
+        } sortWith {
+          case (p1, p2) => (p1.id, p2.id) match {
             case (Some(id1), Some(id2)) => productSort(id1) <= productSort(id2)
             case _ => true
           }
@@ -518,10 +527,10 @@ class MongoStorage(database: DefaultDB) extends Storage[LastError] {
     .collect[Seq]()
 
   /**
-   * Helper method to find brands in the database
+   * Helper method to find categories in the database
    * @param query is the brand query
    * @param projection is the brand projection
-   * @return a sequence of brands
+   * @return a sequence of categories
    */
   private def findCategories(query: BSONDocument, projection: BSONDocument) = categoryCollection
     .find(query, projection)
@@ -605,6 +614,56 @@ class MongoStorage(database: DefaultDB) extends Storage[LastError] {
         }
       )
     }
+  }
+  
+  def findContent(ids: Seq[(String, String)]) : Future[Iterable[ProductContent]] = {
+    findContent(ids, NoSite)
+  }
+  
+  def findContent(ids: Seq[(String, String)], site:String) : Future[Iterable[ProductContent]] = {
+    if (ids.size > 0) {
+      val query = BSONDocument(
+        "_id" -> BSONDocument(
+          if (site == NoSite) "$in" -> (ids map {t => ("/" + t._1 + "-.*/")}) 
+          else "$in" -> (ids map {t => (t._1 + "-" + site)})
+        )
+      )
+
+      val productContentFuture = contentCollection
+        .find(query, DefaultNoHierarchyTokensProjection)
+        .cursor[ProductContent]
+        .collect[Seq]()
+
+      productContentFuture
+    } else {
+      Future.successful(Seq.empty[ProductContent])
+    }
+  }
+
+  def saveProductContent(feedTimestamp: Long, site: String, contents: ProductContent*) : Future[LastError] = {
+    contents.map(content => content.id = Some(content.id + "-" + site))
+    Future.sequence(contents.map(p => contentCollection.save(p))).map(responses => responses.lastOption.orNull)
+  }
+
+  def deleteContent(id: String, feedTimestamp: Long, site: String) : Future[LastError] = {
+    val contentId = if (id == null) ("/.*-" + site + "/") else (id + "-" + site) 
+    contentCollection.remove(BSONDocument(
+      "$and" -> BSONArray(
+        BSONDocument(
+          "_id" -> contentId,
+          "$lt" -> BSONDocument("feedTimestamp" -> feedTimestamp))
+    )))
+  }
+
+  private def updateProductContent(contentFuture: Future[Iterable[ProductContent]], product: Product) : Product = {
+    for (content <- contentFuture.filter(content => content.head.id.getOrElse("").startsWith(product.id.getOrElse("")))) {
+      product.description = content.head.description
+      product.attributes.getOrElse(Seq.empty).filter(elem => elem.name.getOrElse("") == ProductContent.BottomLine).headOption match {
+        case Some(attribute) => attribute.value = content.head.bottomLine
+        case None => None
+      }
+    }
+    product
   }
 
   /**
