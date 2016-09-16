@@ -485,6 +485,8 @@ class ProductFacetQuery(facetField: String, site: String)(implicit context: Cont
   import org.opencommercesearch.api.Collection._
 
   private val closeoutSites: Set[String] = Play.current.configuration.getString("sites.closeout").getOrElse(StringUtils.EMPTY).split(",").toSet
+  private val excludeBackorderSites = Play.current.configuration.getString("sites.excludeBackorder").getOrElse("").split(",").toSet
+  private val excludeToosSites = Play.current.configuration.getString("sites.excludeToos").getOrElse("").split(",").toSet
 
   def this(facetField: String)(implicit context: Context, request: Request[AnyContent]) = this(facetField, null)
 
@@ -504,6 +506,15 @@ class ProductFacetQuery(facetField: String, site: String)(implicit context: Cont
 
     if (site != null) {
       addFilterQuery("categoryPath:" + site)
+
+      if (excludeBackorderSites.contains(site)) {
+        addFilterQuery(s"allowBackorder${context.lang.country}:false")
+      }
+
+      if (excludeToosSites.contains(site)) {
+        addFilterQuery("isToos:false")
+      }
+
     }
     if (request != null) {
 
